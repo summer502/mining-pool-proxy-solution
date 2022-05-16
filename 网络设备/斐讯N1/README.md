@@ -38,7 +38,7 @@
         更新字体缓存`fc-cache -v`  
         
         > 开启字库`/etc/locale.gen`，也可以使用`armbian-config`进行配置  
-        > 设置默认语言`/etc/default/locale`，也可以使用`armbian-config`进行配置。如果要设置成中文环境，改成`LANGUAGE=zh_CN.UTF-8`、`LANG=zh_CN.UTF-8`，全中文环境增加`LC_ALL=zh_CN.UTF-8`，半中文环境增加`LC_CTYPE=zh_CN.UTF-8`和`LANG=en_US.UTF-8`  
+        > 设置默认语言`/etc/default/locale`，也可以使用`armbian-config`进行配置。如果要设置成中文环境，改成`LANGUAGE=zh_CN.UTF-8`、`LANG=zh_CN.UTF-8`，全中文环境增加`LC_ALL=zh_CN.UTF-8`，半中文环境增加`LC_CTYPE=zh_CN.UTF-8`和`LANG=en_US.UTF-8`    
         
         菜单路径【Persion-Locales】，按“上下键”、“空格键”和“Tab键”来切换、选中或取消选中对应的选项，选中“en_US.UTF-8”、“zh_CN.GBK”、“zh_CN.UTF-8”，Ok回车进入下一步  
         ![image](https://user-images.githubusercontent.com/30925759/168517724-9c527cd3-853f-4cd5-bae3-a073e2252bf2.png)
@@ -49,7 +49,7 @@
         
     - E.使用`armbian-config`图形化界面更新系统  
         菜单路径【System-Firmware】，可能会失败，一般重复多试几次就可以了。  
-        也可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致，有的系统版本可以直接用`armbian-config`换镜像源，“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”  
+        也可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致，有的系统版本可以直接用`armbian-config`换镜像源，“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”    
         
     - F.使用`armbian-config`图形化界面安装docker  
         菜单路径【Software-Softy】，选中docker，Install回车进行安装  
@@ -86,7 +86,8 @@ n1就一个网口，直接用newifi刷机了。:joy:<br>
     查看镜像`docker images`  
     ![image](https://user-images.githubusercontent.com/30925759/168521492-e1d3253f-6585-4b71-9113-128dc79b5cae.png)
     创建文件夹`mkdir -p /data/v2ray/conf`，上传`config.json`文件  
-    启动容器`docker run -d --name v2ray-4.45.0 --network host -v /data/v2ray/conf:/etc/v2ray -v /data/v2ray/logs:/var/log/v2ray v2fly/v2fly-core`    
+    创建并启动容器`docker run -d --name v2ray-4.45.0 --network host -v /data/v2ray/conf:/etc/v2ray -v /data/v2ray/logs:/var/log/v2ray v2fly/v2fly-core`    
+    另外，geoip.dat和geosite.dat放在容器的目录`/usr/local/share/v2ray/`下，创建文件夹`mkdir -p /data/v2ray/share`，上传文件后，在`docker run`命令中增加挂载目录映射`-v /data/v2ray/share:/usr/local/share/v2ray`，重新创建容器    
     查看容器`docker ps`  
     ![image](https://user-images.githubusercontent.com/30925759/168528211-51dced4a-7465-4790-8f6c-6798f8dad689.png)
 
