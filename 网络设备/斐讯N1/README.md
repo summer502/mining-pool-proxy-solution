@@ -4,24 +4,12 @@
 在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”就不要执行了，要换成刷armbian。如果刷机失败，参考教程里面的救砖操作。   
 
 二. 刷机  
-```markdown
+
+``` markdown
     1. 刷入armbian系统
     2. 刷入openwrt系统
 ```
-<a name="目标内容">元素内容</a>
-<a name="这是锚点目标">跳转到这里</a>
-这是一个锚点目标
-====
 
-这是一个锚点目标
----
-
-# 这是一个锚点目标
-## 这是一个锚点目标
-### 这是一个锚点目标
-#### 这是一个锚点目标
-##### 这是一个锚点目标
-###### 这是一个锚点目标
 1. 安装armbian  
 新装和重装系统都一样。  
     (1)刻录U盘镜像  
@@ -49,8 +37,8 @@
         安装中文字体，文泉驿正黑`apt-get install fonts-wqy-zenhei`，文泉驿微米黑`apt-get install fonts-wqy-microhei`，google思源字体`apt-get install fonts-noto-cjk`  
         更新字体缓存`fc-cache -v`  
         
-        >开启字库`/etc/locale.gen`，也可以使用`armbian-config`进行配置  
-        >设置默认语言`/etc/default/locale`，也可以使用`armbian-config`进行配置。如果要设置成中文环境，改成`LANGUAGE=zh_CN.UTF-8`、`LANG=zh_CN.UTF-8`，全中文环境增加`LC_ALL=zh_CN.UTF-8`，半中文环境增加`LC_CTYPE=zh_CN.UTF-8`和`LANG=en_US.UTF-8`  
+        > 开启字库`/etc/locale.gen`，也可以使用`armbian-config`进行配置  
+        > 设置默认语言`/etc/default/locale`，也可以使用`armbian-config`进行配置。如果要设置成中文环境，改成`LANGUAGE=zh_CN.UTF-8`、`LANG=zh_CN.UTF-8`，全中文环境增加`LC_ALL=zh_CN.UTF-8`，半中文环境增加`LC_CTYPE=zh_CN.UTF-8`和`LANG=en_US.UTF-8`  
         
         菜单路径【Persion-Locales】，按“上下键”、“空格键”和“Tab键”来切换、选中或取消选中对应的选项，选中“en_US.UTF-8”、“zh_CN.GBK”、“zh_CN.UTF-8”，Ok回车进入下一步  
         ![image](https://user-images.githubusercontent.com/30925759/168517724-9c527cd3-853f-4cd5-bae3-a073e2252bf2.png)
@@ -77,37 +65,33 @@
         默认状态已经是关闭了的。在自己用的内网环境中不需要开启防火墙
         
 2. 安装openwrt  
-n1就一个网口，直接用newifi刷机了。<br>
+n1就一个网口，直接用newifi刷机了。:joy:<br>
     openwrt下载：https://openwrt.org/
-    <br>
-    斐讯路由器<br>
+    
+    <br>斐讯路由器<br>
     ![image](https://user-images.githubusercontent.com/30925759/168520652-bf563d55-692a-41c8-9bfb-815609015cf8.png)
-    优酷路由器<br>
+    <br>优酷路由器<br>
     ![image](https://user-images.githubusercontent.com/30925759/168520662-e9b9a169-b2f1-4c9a-a9a3-a5311cf84f1c.png)
-    谛听newifi路由器<br>
+    <br>谛听newifi路由器<br>
     ![image](https://user-images.githubusercontent.com/30925759/168520678-8706de67-81aa-47ce-b2eb-ef6a4e23d597.png)
     
 三. 安装v2ray客户端  
 参考：https://guide.v2fly.org/  
-```markdown
-    1. 使用docker安装
-    2. 使用deb包安装
-```
 
-1. 使用docker安装    
+> 1. [使用docker安装](#v2ray-docker)  
+> 2. <a href="#v2ray-deb">使用deb包安装</a>    
+
+1. <span id="v2ray-docker">使用docker安装</span><br>
     拉[DockerHub](https://hub.docker.com/r/v2fly/v2fly-core)中的镜像`docker pull v2fly/v2fly-core`  
     查看镜像`docker images`  
     ![image](https://user-images.githubusercontent.com/30925759/168521492-e1d3253f-6585-4b71-9113-128dc79b5cae.png)
     创建文件夹`mkdir -p /data/v2ray`，上传`config.json`文件  
-    启动容器`docker run -d --name v2ray-v4.45.0 --network host -v /data/v2ray/config.json:/etc/v2ray/config.json v2fly/v2fly-core`    
+    启动容器`docker run -d --name v2ray-4.45.0 --network host -v /data/v2ray/config.json:/etc/v2ray/config.json v2fly/v2fly-core`    
     查看容器`docker ps`  
     ![image](https://user-images.githubusercontent.com/30925759/168528211-51dced4a-7465-4790-8f6c-6798f8dad689.png)
 
-2. 使用deb包安装  
-<a href="#目标内容">内容</a>
-<a href="#html锚点">HTML方式的锚点</a>
-[MarkDown方式的锚点](#目标内容)
-[MarkDown方式的锚点]: #MarkDown锚点
-[MD锚点][MarkDown方式的锚点]
-[MarkDown方式的锚点][]
-<a href="#目标内容" title="标题">内容</a>
+2. <a name="v2ray-deb">使用deb包安装</a>  
+    下载：https://pkgs.org/download/v2ray
+    <br>
+    下载：https://github.com/dreamrover/v2ray-deb
+    <br>
