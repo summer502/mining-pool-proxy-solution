@@ -1,0 +1,65 @@
+{
+  "inbounds": [
+    {
+      "port": 8090,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      },
+      "settings": {
+        "auth": "noauth",
+        "udp": false
+      }
+    },
+    {
+      "port": 8091,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": true,
+        "ip": "127.0.0.1"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "123.58.4.3",
+            "port": 443,
+            "users": [
+              {
+                "id": "d3bfa5c6-dadf-8706-20dd-8e58c271bb0d",
+                "alterId": 0,
+                "level": 1
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "tlsSettings": {
+          "allowInsecure": true,
+          "serverName": "easytools.org"
+        },
+        "wsSettings": {
+          "path": "/easytools/v2/ws"
+        }
+      },
+      "mux": {
+        "enabled": true,
+		"concurrency": 8
+      }
+    }
+  ]
+}

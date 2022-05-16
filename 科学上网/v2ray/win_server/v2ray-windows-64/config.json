@@ -1,0 +1,32 @@
+{  "log": {
+        "loglevel": "warning"
+    },
+  "inbounds": [
+    {
+      "port": 11080,
+      "listen":"127.0.0.1",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "d3bfa5c6-dadf-8706-20dd-8e58c271bb0d",
+            "alterId": 0,
+			"level": 1
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+        "path": "/easytools/v2/ws"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
