@@ -85,8 +85,8 @@ n1就一个网口，直接用newifi刷机了。:joy:<br>
     拉[DockerHub](https://hub.docker.com/r/v2fly/v2fly-core)中的镜像`docker pull v2fly/v2fly-core`  
     查看镜像`docker images`  
     ![image](https://user-images.githubusercontent.com/30925759/168521492-e1d3253f-6585-4b71-9113-128dc79b5cae.png)
-    创建文件夹`mkdir -p /data/v2ray`，上传`config.json`文件  
-    启动容器`docker run -d --name v2ray-4.45.0 --network host -v /data/v2ray/config.json:/etc/v2ray/config.json v2fly/v2fly-core`    
+    创建文件夹`mkdir -p /data/v2ray/conf`，上传`config.json`文件  
+    启动容器`docker run -d --name v2ray-4.45.0 --network host -v /data/v2ray/conf:/etc/v2ray -v /data/v2ray/logs:/var/log/v2ray v2fly/v2fly-core`    
     查看容器`docker ps`  
     ![image](https://user-images.githubusercontent.com/30925759/168528211-51dced4a-7465-4790-8f6c-6798f8dad689.png)
 
