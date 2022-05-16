@@ -34,7 +34,7 @@
  - netsh配置参考[***Netsh interface portproxy 命令***](https://docs.microsoft.com/zh-cn/windows-server/networking/technologies/netsh/netsh-interface-portproxy)。  
  - redir配置参考[***A TCP port redirector for UNIX***](https://github.com/troglobit/redir)。  
  
- 不建议这样做，即使用了“**stratum+ssl**”，挖矿内核是通过跳过TLS证书有效性认证的方式通信，在ssl握手阶段和依据后期持的续流量行为特征，仍然可以识别出来。另外，挖矿内核程序会连接开发者的指定的矿池（一般是私有池），依然可以识别出来。  
+ 不建议这样做，即使用了“**stratum+ssl**”，挖矿内核是通过跳过TLS证书有效性认证的方式通信，在ssl握手阶段和依据后期持的续流量行为特征，仍然可以识别出来。另外，挖矿内核程序会另外连接开发者的指定的矿池（一般是私有池），依然可以识别出来。  
  
  ### 3. 自建vpn科学上网  
  首先要有一台非大陆范围并且可以访问矿池的服务器，比如像我的vps，安装部署`v2ray`·、`trojan`等软件，这些软件通过C/S架构模式提供了科学上网的实现能力。  
@@ -48,14 +48,17 @@
  ### 4. 手写一个端口加密中转服务  
  采用C/S架构模式，依据**socket**编程，自定义报文协议，使用数据压缩算法，使用非对称加密算法，做好流量伪装混淆机制。同样要有一台非大陆范围并且可以访问矿池的服务器，完成对矿池和开发者私池的端口中转代理，最后配合域名拦截，把挖矿内核程序调用指向C端。  
  
- 这是我写的一个矿池中转服务[***minerProxyer***](../../../minerProxyer)。  
+ 这是用java写的一个矿池中转代理服务[***minerProxyer***](../../../minerProxyer)。  
  
  不建议这样做，太费事了。 
  
- ### 5. 使用蒲公英的智能组网  
- 首先在vps上安装[蒲公英客户端](https://pgy.oray.com/download/)和矿池代理服务，矿机这边也安装蒲公英客户端，或者使用蒲公英路由器，配置组网成功后，都在两边设备都在一个虚拟局域网中，使用虚拟ip访问vps上的矿池代理服务端口。
+ ### 5. 使用oray蒲公英的智能组网  
+ 蒲公英组网原理有点像[zerotier](https://www.zerotier.com/)组网。首先在vps上安装[蒲公英客户端](https://pgy.oray.com/download/)和矿池代理服务，矿机这边也安装蒲公英客户端，或者使用蒲公英路由器，配置组网成功后，都在两边设备都在一个虚拟局域网中，使用虚拟ip访问vps上的矿池代理服务端口。走蒲公英服务器的转发带宽是1~2M，挖矿够用了。  
  ![image](https://user-images.githubusercontent.com/30925759/159162155-04876b4b-2111-438f-957a-11b3936823d1.png)
-
  
- <br></br>
+ <br>
+ <br>
  最后，啊啊啊，低调上网，我们都是好孩子。  
+ 
+ ---
+ 资料整理归档2022-05-16
