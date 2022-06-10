@@ -49,7 +49,9 @@
         
     - E.使用`armbian-config`图形化界面更新系统  
         菜单路径【System-Firmware】，可能会失败，一般重复多试几次就可以了。  
-        也可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致，有的系统版本可以直接用`armbian-config`换镜像源，“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”    
+        也可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致，有的系统版本可以直接用`armbian-config`换镜像源，“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”。    
+        也可以指定下docker官方源，例如Ubuntu的，参考官方文档`https://docs.docker.com/engine/install/ubuntu/`，复制粘贴命令跑下就可以了  
+        ![image](https://user-images.githubusercontent.com/30925759/173090104-9781c858-0273-47ad-bae2-2a380d8061b8.png)
         
     - F.使用`armbian-config`图形化界面安装docker  
         菜单路径【Software-Softy】，选中docker，Install回车进行安装  
