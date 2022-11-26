@@ -1,7 +1,36 @@
 
 一. 斐讯原版系统降级操作  
 参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/  
-在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”就不要执行了，要换成刷armbian。如果刷机失败，参考教程里面的救砖操作。   
+在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”时，要换成刷armbian。  
+如果刷机失败，参考教程里面的救砖操作。   
+
+点击下载[刷机工具包](https://update.peiluyou.com/downloads/S905D-N1-Burning-Guide-V3.0.zip)，将工具包下载后解压；    
+![image](https://user-images.githubusercontent.com/30925759/204098246-2432b608-098f-40e2-b503-245e6c20620e.png)  
+需要注意的是，`s905_usb_burn_img_V3.1.7.zip`是网心云系统镜像包，`S905D-N1-Burning-Guide-V3.0.zip`是N1刷机工具包。  
+
+N1插网线和电脑接入同一局域网；   
+开机后，进入N1主画面（安卓系统），记下N1获得的内网IP地址；  
+![image](https://user-images.githubusercontent.com/30925759/204096778-8b87e14c-df41-4c76-abc3-dc0871625955.png)  
+开启远程调试打开adb(Android Debug Bridge) ，在固件版本的位置，连续点击4下鼠标左键，主页会弹出一个提示“打开adb”；  
+![image](https://user-images.githubusercontent.com/30925759/204096810-54def087-75c1-46b3-b1a8-4311d4ff638f.png)  
+
+通过adb网络连接N1，使设备重启后进入fastboot模式；
+```
+adb connect N1内网IP
+adb shell reboot fastboot
+```
+ **注意：不需要USB Burning Tool烧录，不需要用usb双公头线，无论刷机还是重刷都是用不到的！**  
+
+在fastboot模式下，检查是否可降级，执行降级操作；  
+如果固件版本是V2.22~V2.32，则需要换掉斐讯的bootloader，将boot分区降级到低版本。  
+```
+fastboot devices –l
+fastboot flash bootloader bootloader.img  
+fastboot flash boot boot.img  
+fastboot flash recovery  recovery.img
+fastboot reboot
+```
+
 
 二. 刷机  
 
@@ -21,6 +50,10 @@
     安装参考帖子：https://forum.armbian.com/topic/12162-single-armbian-image-for-rk-aml-aw-aarch64-armv8/  
     
     (3)把armbian系统写入EMMC  
+    ```
+    adb connect N1内网IP
+    adb reboot update
+    ```
     
     (4)安装后的优化配置  
     - A.使用`armbian-config`图形化界面配置wifi  
