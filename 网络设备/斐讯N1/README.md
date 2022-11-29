@@ -1,15 +1,15 @@
 
 一. 斐讯原版系统降级操作  
 参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/  
-如果刷机失败，参考教程【FX刷机失败，救砖工具】里面的救砖操作。 
+如果刷机失败，参考教程【FX刷机失败，救砖工具】里面的救砖操作。   
 在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”时，要换成刷armbian镜像。  
 
 点击下载[刷机工具包](https://update.peiluyou.com/downloads/S905D-N1-Burning-Guide-V3.0.zip)，将工具包下载后解压；    
 ![image](https://user-images.githubusercontent.com/30925759/204098246-2432b608-098f-40e2-b503-245e6c20620e.png)  
 需要注意的是，`s905_usb_burn_img_V3.1.7.zip`是网心云系统镜像包，`S905D-N1-Burning-Guide-V3.0.zip`是N1刷机工具包。  
-使用刷机工具包`S905D-N1-Burning-Guide-V3.0.zip`的整个过程操作：依次执行脚本，`第2步进入fasteboot.bat`-->`第3步检查是否可以降级.bat`-->`第4步降级.bat`-->`第5步降级完成后执行重启.bat`-->刻录U盘-->`第6步进入U盘模式开始刷机.bat`  
+使用刷机工具包`S905D-N1-Burning-Guide-V3.0.zip`的整个过程操作：依次执行脚本，`第2步进入fasteboot.bat`-->`第3步检查是否可以降级.bat`-->`第4步降级.bat`-->`第5步降级完成后执行重启.bat`-->刻录U盘-->`第6步进入U盘模式开始刷机.bat`。  
 
-N1开机后，进入N1主画面（安卓系统），将N1和电脑接入同一局域网，用USB双公头线连接电脑和N1的靠近HDMI接口的USB口（记得先接电源再接usb双公头线）；   
+N1开机后，进入N1主画面（安卓系统），将N1和电脑接入同一局域网，用USB双公头线连接电脑和N1的靠近HDMI接口的USB口（先接电源再接usb双公头线）；   
 ![image](https://user-images.githubusercontent.com/30925759/204096778-8b87e14c-df41-4c76-abc3-dc0871625955.png)  
 记下N1的内网IP地址；  
 打开adb(Android Debug Bridge) ，开启远程调试，在***固件版本***的位置，连续点击4下鼠标左键，主页会弹出一个提示“打开adb”；  
@@ -27,12 +27,13 @@ adb shell reboot fastboot
 
 N1进入fastboot线刷模式后（通过双公头线USB通信），会听到电脑有个“叮咚”的有新硬件接入提示音，可以在“我的电脑-管理-计算机管理-设备管理器”页面查看是否识别出了已连接设备；  
 ![image](https://user-images.githubusercontent.com/30925759/204121568-383c7823-c0f1-4236-ba39-d3ddb4967a05.png)  
-如果新设备处显示黄色感叹号（此时用`fastboot devices`读取不到设备），驱动异常，则需要安装“Android ADB Interface”驱动。可以在“windows更新-查看可选更新-驱动程序更新”处下载驱动更新，也可以去微软网站下载安装[LeMobile驱动程序](https://www.catalog.update.microsoft.com/Search.aspx?q=lemobile)。  
+如果新设备处显示黄色感叹号（此时执行`fastboot devices`读取不到设备），驱动异常，则需要安装“Android ADB Interface”驱动。可以在“windows更新-查看可选更新-驱动程序更新”处下载驱动更新，也可以去微软网站下载安装[LeMobile驱动程序](https://www.catalog.update.microsoft.com/Search.aspx?q=lemobile)。  
 ![image](https://user-images.githubusercontent.com/30925759/204122362-182b8aa2-153a-46be-93b6-08d72f9c0110.png)  
 或者去谷歌网站下载[Google USB 驱动程序ZIP文件](https://developer.android.google.cn/studio/run/win-usb?hl=zh-cn)，在“设备管理器”页面，右键点击已连接设备的名称，然后选择“更新驱动程序”，手动更新安装驱动。  
 
 在fastboot线刷模式下，检查是否可降级，执行降级操作；  
 如果固件版本是V2.22~V2.32，则需要换掉斐讯的bootloader，将boot分区降级到低版本。如果固件版本是V2.19，那么不需要降级。  
+降级完成后，N1主界面上显示的***固件版本***不会有变化。  
 ```
 #查看Fastboot模式下连接的的设备，会返回类似XXXXXXXXXXXX fastboot这样的提示（XXXXX为序列号），表示fastboot工具已识别设备
 fastboot devices –l
@@ -44,7 +45,6 @@ fastboot flash recovery  recovery.img
 fastboot reboot
 ```
 
-
 二. 刷机  
 
 ``` markdown
@@ -55,56 +55,59 @@ fastboot reboot
 1. 安装armbian  
 新装和重装系统都一样。装linux不需要用USB_Burning_Tool烧录。  
     (1)刻录U盘镜像  
-    **用个好一点的U盘，像Kingston，读写速度均在10MB/s以上，用杂牌U盘可能会出现无法从U盘启动或者进入Recovery界面的情况**  
+    **用个好一点的U盘，像Kingston、SanDisk，读写速度均在10MB/s以上，最好接口是usb2.0的，用杂牌U盘可能会出现无法从U盘启动或者进入Recovery界面的情况**  
     使用`balbes150`大神的armbian镜像  
     系统镜像下载：https://users.armbian.com/balbes150/arm-64/  
     ![image](https://user-images.githubusercontent.com/30925759/168515862-2e065d13-7c6a-4d34-8a30-829c287f6e5b.png)  
     
-    比如选择`Armbian_20.10_Arm-64_bullseye_current_5.9.0.img.xz`下载（N1的GPU性能不错，能跑4k解码，建议装Desktop版）  
+    比如选择`Armbian_20.10_Arm-64_bullseye_current_5.9.0.img.xz`下载（N1的GPU性能不错，能跑4k解码，可以装Desktop版）  
     解压后，用`USB Image Tool`或者`Win32DiskImager`或者`balenaEtcher`或者`Rufus`刻录  
     ![image](https://user-images.githubusercontent.com/30925759/204129696-1e12cbca-8273-4ba4-87c2-417a306ff5f6.png)  
-    刻录完成后，在“我的电脑-管理-计算机管理-磁盘管理”页面，看到有2个磁盘，其中一个是以“BOOT”为卷标的  
+    刻录完成后，在“我的电脑-管理-计算机管理-磁盘管理”页面，看到有2个磁盘分区，其中一个是以“BOOT”为卷标的  
     ![image](https://user-images.githubusercontent.com/30925759/204141539-beed3851-1e9f-4046-abae-22a2c118d6e2.png)  
     
     (2)配置n1的armbian安装参数  
+    **注意，以下步骤适用于Armbian 20.08及之后的版本**    
     安装参考帖子：https://forum.armbian.com/topic/12162-single-armbian-image-for-rk-aml-aw-aarch64-armv8/  
     打开刻录好的U盘根目录，如下图所示：  
     ![image](https://user-images.githubusercontent.com/30925759/204125536-a7f8bbd2-11a7-4471-a76e-6721d4eec050.png)  
-    a.修改`extlinux`目录下的`extlinux.conf`文件：
-    前三行不变，之后全用#注释，修改`# aml s9xxx`处，新增加一条`FDT /dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb`，解除`APPEND`那行的注释  
+    a.修改`extlinux`目录下的`extlinux.conf`文件：前三行不变，之后的行全用`#`注释，修改`# aml s9xxx`处，新增加一条`FDT /dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb`，解除`APPEND`那行的注释  
     ![image](https://user-images.githubusercontent.com/30925759/204125773-88adca97-f9c9-44f4-ace0-2188b7ebf514.png)  
-    b.把U盘根目录下的`u-boot-s905x-s912`重命名为`u-boot.ext`
+    b.把U盘根目录下的`u-boot-s905x-s912`重命名为`u-boot.ext`  
     
-    (3)安装系统，把armbian系统写入EMMC  
-    a.将刻录好的U盘插入到斐讯的N1盒子靠近hdmi的USB口；  
+    (3)安装armbian系统，把armbian系统写入EMMC  
+    a.将刻录好的U盘插入到斐讯的N1盒子靠近hdmi的USB口（**不要插入键盘鼠标**）   
     ![image](https://user-images.githubusercontent.com/30925759/204118410-299ad3b4-ded3-42b0-b77d-7c39b9cfc445.png)  
     使用adb命令重启设备  
     ```
     adb connect N1内网IP
     adb shell reboot update
     ```
-    重启后，N1会从U盘启动进入armbian系统（N1现在已经是优先从U盘启动）  
-    也可以，先断电源，将U盘插入靠近HDMI的USB口，插入网线、HDMI和键盘，再插入电源后设备启动。断电重启N1，N1同样会从U盘启动进入armbian系统  
-    如果进入了recovery界面，大概率是U盘不行，需要换个好一点的U盘  
-    如果没有从U盘启动，还是启动进入了斐讯系统，则使用adb命令重启设备再一次从U盘启动  
-    
-    b.设备重新启动后，出现斐讯开机画面，之后会黑屏一会儿（黑屏时间与U盘读写速度有关），等待亮屏自动加载进入armbian  
-    ![image](https://user-images.githubusercontent.com/30925759/204140599-61851e8d-6c40-4d90-b9b9-fba8daac2b04.png)  
+    重启后，N1会从U盘启动并进入armbian系统（N1现在已经是优先从U盘启动）  
+    也可以，先断电源，将U盘插入靠近HDMI的USB口，插入网线、HDMI，**不要插入键盘鼠标**，再插入电源后设备启动。  
+    断电重启N1，N1同样会从U盘启动并进入armbian系统  
+    ```
+    如果在开机画面卡死，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
+    如果进入了recovery界面，大概率是U盘不行，需要换个好一点的U盘试试  
+    如果没有从U盘启动，还是启动进入了斐讯系统，则使用adb命令重启设备再一次尝试从U盘启动  
+    如果由开机画面进入黑屏，持续长时间几分钟，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
+    如果闪屏（开机画面->黑屏->开机画面->黑屏...），需要拔掉键盘鼠标  
+    ```
+    b.在设备重新启动后，出现斐讯开机画面，之后会黑屏一会儿（此时正在从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动加载进入armbian系统  
+    ![image](https://user-images.githubusercontent.com/30925759/204523053-61a8968d-4672-439f-be23-b9707635694a.png)  
+    亮屏后自动加载armbian  
+    ![image](https://user-images.githubusercontent.com/30925759/204522793-08543010-d2de-4946-ac73-73c36bfbf3b8.png)  
     进入armbian  
-    
-    c.设置root新密码  
-    
+    ![image](https://user-images.githubusercontent.com/30925759/204522617-99c763a1-5618-475e-80da-334772da7c8e.png)  
+    c.设置root的新密码，**此时可以插入键盘鼠标了**    
     d.将armbian系统从U盘写入N1的emmc    
-    执行`./install-aml.sh`
-    e.执行`poweroff`，拔出u盘，插入电源重新开机  
-    至此，armbian已经安装成功。以上步骤适用于Armbian20.08之后的版本。
-
-对于N1，如果U盘启动或写入emmc开不了机，重新用U盘再写一次，或换成旧版本刷一次就好，无需重新线刷n1到Android。
-此时系统将从内部EMMC启动，对于想一直从外部启动的，要修改EMMC中的/boot/extlinux目录下的extlinux.conf文件中，ROOT_EMMC改为ROOTFS，插上外部系统盘，重启即可。
-
-    
-    
-
+    执行`./install-aml.sh`  
+    ![image](https://user-images.githubusercontent.com/30925759/204523599-5df3a31c-6112-457a-87b2-7eca6ea71b2e.png)  
+    e.执行`poweroff`，拔出u盘，拔掉键盘鼠标，在插入电源重新开机  
+    **注意，只能在N1开机后插入键盘鼠标，否则会出现闪屏或者黑屏无法启动的情况**  
+    至此，armbian已经安装成功。  
+    f.修改设备树dtb文件  
+    对于N1，如果U盘启动或写入emmc开不了机，重新用U盘再写一次，或换成旧版本刷一次就好，无需重新线刷n1到Android。此时系统将从内部EMMC启动，对于想一直从外部启动的，要修改EMMC中的/boot/extlinux目录下的extlinux.conf文件中，ROOT_EMMC改为ROOTFS，插上外部系统盘，重启即可。  
     
     (4)安装后的优化配置  
     - A.使用`armbian-config`图形化界面配置wifi  
