@@ -111,6 +111,8 @@ fastboot reboot
     e.执行`poweroff`关机，拔出u盘，拔掉键盘鼠标，在插入电源重新开机  
     **注意，只能在N1开机后插入键盘鼠标，否则会出现闪屏或者黑屏无法启动的情况**  
     如果这时出现开不了机或者在初始化加载出现“random: crng init done”的情况，插上用U盘，断电10秒后重启，多试几次，或者先刷低版本成功后再刷高版本，无需线刷回Android系统。      
+    查看版本信息`cat /etc/lsb-release`    
+    `cat /etc/issue`  
     
     > 关于**重装系统**  
     > 写入emmc后，系统将优先从EMMC启动。如果想改为优先从U盘启动，需要修改`/boot/extlinux/extlinux.conf`文件，把`ROOT_EMMC`改为`ROOTFS`，再插上U盘，重启即可    
@@ -139,50 +141,80 @@ fastboot reboot
     (4)安装后的优化配置  
     - A.使用`armbian-config`图形化界面配置wifi  
         菜单路径【Network-WiFi】  
+        ![image](https://user-images.githubusercontent.com/30925759/204567305-0a839e21-3a52-420c-a412-3d982c2a1a32.png)  
         如果没有WiFi菜单，执行`apt install network-manager`重装network-manager  
         
     - B.使用`armbian-config`图形化界面配置ssh  
         菜单路径【System-SSH】  
-        ![image](https://user-images.githubusercontent.com/30925759/168535411-c45c3626-2d2b-4c85-ae8d-15d2816bc7b8.png)
+        ![image](https://user-images.githubusercontent.com/30925759/168535411-c45c3626-2d2b-4c85-ae8d-15d2816bc7b8.png)  
 
     - C.使用`armbian-config`图形化界面配置时区  
-        菜单路径【Persion-Timezone】，选择shanghai  
+        菜单路径【Personal-Timezone】，选择shanghai  
         
-    - D.使用`armbian-config`图形化界面配置语言  
-        安装中文字体，文泉驿正黑`apt-get install fonts-wqy-zenhei`，文泉驿微米黑`apt-get install fonts-wqy-microhei`，google思源字体`apt-get install fonts-noto-cjk`  
-        更新字体缓存`fc-cache -v`  
+    - D.使用`armbian-config`图形化界面配置语言和区域  
+        > 设置中文环境时要安装中文字体，否则中文会乱码。文泉驿正黑`apt-get install fonts-wqy-zenhei`，文泉驿微米黑`apt-get install fonts-wqy-microhei`，google思源字体`apt-get install fonts-noto-cjk`  
+        > 更新字体缓存`fc-cache -v`  
+        > 安装中文字体后，需要重启系统`reboot`  
         
-        > 开启字库`/etc/locale.gen`，也可以使用`armbian-config`进行配置  
-        > 设置默认语言`/etc/default/locale`，也可以使用`armbian-config`进行配置。如果要设置成中文环境，改成`LANGUAGE=zh_CN.UTF-8`、`LANG=zh_CN.UTF-8`，全中文环境增加`LC_ALL=zh_CN.UTF-8`，半中文环境增加`LC_CTYPE=zh_CN.UTF-8`和`LANG=en_US.UTF-8`    
+        菜单路径【Personal-Locales】，按“上下键”、“空格键”和“Tab键”来切换、选中或取消选中对应的选项，选中“en_US.UTF-8”、“zh_CN.GBK”、“zh_CN.UTF-8”，Ok回车进入下一步  
+        locale的命名规则为<语言>_<地区>.<字符集编码>，如zh_CN.UTF-8，zh代表中文，CN代表大陆地区，UTF-8表示字符集。  
+        ![image](https://user-images.githubusercontent.com/30925759/168517724-9c527cd3-853f-4cd5-bae3-a073e2252bf2.png)  
+        默认“语言_地区.字符集”选择“en_US.UTF-8”  
+        ![image](https://user-images.githubusercontent.com/30925759/168517771-eaaef55e-7db8-4e13-99d3-56eace8f4d63.png)  
         
-        菜单路径【Persion-Locales】，按“上下键”、“空格键”和“Tab键”来切换、选中或取消选中对应的选项，选中“en_US.UTF-8”、“zh_CN.GBK”、“zh_CN.UTF-8”，Ok回车进入下一步  
-        ![image](https://user-images.githubusercontent.com/30925759/168517724-9c527cd3-853f-4cd5-bae3-a073e2252bf2.png)
-        默认语言选择“en_US.UTF-8”  
-        ![image](https://user-images.githubusercontent.com/30925759/168517771-eaaef55e-7db8-4e13-99d3-56eace8f4d63.png)
-        ![image](https://user-images.githubusercontent.com/30925759/168545445-87a4bfc1-77f5-41a4-a6c8-8adf78867c94.png)
-        安装中文字体后，需要重启系统`reboot`
+        >不使用armbian-config来配置系统区域设置时：  
+        >开启系统支持的字库`vi /etc/locale.gen`，字符集用“UTF-8”的，去掉“zh_CN.UTF-8”那行的注释`#`。也可以使用locale-gen命令来安装某种locale，比如安装zh_CN.UTF-8字库，执行命令`locale-gen zh_CN.UTF-8`。  
+        >使用命令`locale -a`查看系统目前支持的所有语言包。    
+        >设置默认语言`vi /etc/default/locale`。全中文环境改成`LANGUAGE=zh_CN.UTF-8`、`LANG=zh_CN.UTF-8`，增加`LC_ALL=zh_CN.UTF-8`。半中文环境改成`LANGUAGE=zh_CN.UTF-8`、`LANG=en_US.UTF-8`，增加`LC_CTYPE=zh_CN.UTF-8`。也可以使用命令`update-locale LANG=zh_CN.UTF-8`来修改。  
+        >使用命令`locale`查看当前locale设置。  
+        >![image](https://user-images.githubusercontent.com/30925759/168545445-87a4bfc1-77f5-41a4-a6c8-8adf78867c94.png)  
+        >修改环境变量`vi /etc/environment`，添加`LC_ALL=zh_CN.UTF-8`。  
+        >重启系统`reboot`。  
+        
+        >1. 全新字符库编码信息位于 /usr/share/i18n目录下面，其中SUPPORTED中包含可用的所用字符集。其中的charmaps存的每种字符集的映射信息。使用localedef可以生成字符集，就是locales里面那些东西。但这些并不是系统中能用的字符集。刚才描述的这些/usr/share/i18n里面的文件只能算是可用的字符集，locale -m可以看到列表。
+        >![image](https://user-images.githubusercontent.com/30925759/204591658-6e1defa1-ef30-42b2-9192-13e0ed355911.png)  
+        >2. 为了让系统能使用，原始的/usr/share/i18n中的文件要经过处理（complile），能用的字符编码在/usr/lib/locale/下面，成为complied字符集。
+        >3. 使用locale-gen可以把原始的/usr/share/i18n中的文件complie成系统能用的/usr/lib/locale/地字符集。所以当使用locale-gen 命令出现由某些文件确实而失败的情况，往往是由/usr/share/i18n下缺少相应文件导致的。
+        >4. /usr/share/i18n里面的东西操作系统无关，不同体系结构不同系统可以通用，若有缺失，从其他地方复制来便可。
         
     - E.使用`armbian-config`图形化界面更新系统  
         菜单路径【System-Firmware】，可能会失败，一般重复多试几次就可以了。  
-        不要直接执行`apt update && apt upgrade`，特别是在选“Y”时要特别注意，否则会更改适配N1的系统配置。  
+        不要直接执行`apt update && apt upgrade`更新系统，特别是在选“Y”时要特别注意，否则会更改适配N1的系统配置。  
         可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致。  
-        有的系统armbian-config版本可以直接用`armbian-config`图形化界面换镜像源，路径是“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”。如果没有Mirrors菜单，执行`apt install armbian-config`更新升级armbian-config软件版本。执行`apt list --installed armbian-config`查看当前已安装版本。    
+        有的系统armbian-config版本可以直接用`armbian-config`图形化界面换镜像源，路径是“armbian-config -> Personal -> Mirrors -> 选一个源 -> Ok”。如果没有Mirrors菜单，执行`apt install armbian-config`更新升级armbian-config软件版本。执行`apt list --installed armbian-config`查看当前已安装版本。    
         同时，也可以指定下docker官方源，例如Ubuntu的，参考官方文档`https://docs.docker.com/engine/install/ubuntu/`，复制粘贴命令跑下就可以了  
         ![image](https://user-images.githubusercontent.com/30925759/173090104-9781c858-0273-47ad-bae2-2a380d8061b8.png)  
         
     - F.使用`armbian-config`图形化界面安装docker  
         菜单路径【Software-Softy】，选中docker，Install回车进行安装  
-        ![image](https://user-images.githubusercontent.com/30925759/168517516-e3240021-5d4f-4c96-8916-37412d783479.png)
-        安装完成后，查看docker版本`docker version`  
-        ![image](https://user-images.githubusercontent.com/30925759/168537798-5b88485f-698d-4b37-8b32-516199a3411d.png)
+        ![image](https://user-images.githubusercontent.com/30925759/168517516-e3240021-5d4f-4c96-8916-37412d783479.png)  
+        安装完成后，用命令`docker version`查看docker版本  
+        ![image](https://user-images.githubusercontent.com/30925759/168537798-5b88485f-698d-4b37-8b32-516199a3411d.png)  
         
     - G.关闭日志服务写入emmc，延长emmc寿命  
-        ![image](https://user-images.githubusercontent.com/30925759/168519447-21219e8a-7c76-4573-9fbf-ecb5eb971e70.png)
+        使用zram磁盘      
+        ![image](https://user-images.githubusercontent.com/30925759/168519447-21219e8a-7c76-4573-9fbf-ecb5eb971e70.png)  
         编辑`armbian-ramlog`文件，`vim /etc/default/armbian-ramlog`，true是开启，false是关闭  
-        ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)
+        ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)  
+        
+        或者，关闭syslog系统日志服务  
+        ```shell
+        systemctl disable syslog
+        systemctl stop syslog
+        ```
+        
     - H.关闭防火墙  
         默认状态已经是关闭了的。在自己用的内网环境中不需要开启防火墙
-        
+    - I.使用“usbmount”实现USB设备自动挂载  
+        dpkg -i usbmount_0.0.24_all.deb  
+        /etc/usbmount/usbmount.conf
+    - J.把移动硬盘当作系统盘或数据盘用，固定到指定的挂载点，实现开机自动挂载移动硬盘    
+        fdisk -l  
+        blkid  
+        vim /etc/fstab  
+        UUID=50C7117B50C50979 /mnt/hdd1T  ntfs  defaults,nofail,x-systemd.device-timeout=1,noatime 0 0  
+        UUID=50C7117B50C50979  /mnt/sda1 ntfs defaults 0 1  
+    
 2. 安装openwrt  
 n1就一个网口，直接用newifi刷机了。:joy:<br>
     openwrt下载：https://openwrt.org/
