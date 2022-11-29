@@ -55,7 +55,7 @@ fastboot reboot
 1. 安装armbian  
 新装和重装系统都一样。装linux不需要用USB_Burning_Tool烧录。  
     (1)刻录U盘镜像  
-    **用个好一点的U盘，像Kingston、SanDisk，读写速度均在10MB/s以上，最好接口是usb2.0的，用杂牌U盘可能会出现无法从U盘启动或者进入Recovery界面的情况**  
+    **用个好一点的U盘，像Kingston、SanDisk，读写速度均在10MB/s以上，最好接口是usb2.0的，用杂牌U盘可能会出现无法从U盘启动或者进入Android Recovery界面的情况**  
     使用`balbes150`大神的armbian镜像  
     系统镜像下载：https://users.armbian.com/balbes150/arm-64/  
     ![image](https://user-images.githubusercontent.com/30925759/168515862-2e065d13-7c6a-4d34-8a30-829c287f6e5b.png)  
@@ -71,8 +71,10 @@ fastboot reboot
     安装参考帖子：https://forum.armbian.com/topic/12162-single-armbian-image-for-rk-aml-aw-aarch64-armv8/  
     打开刻录好的U盘根目录，如下图所示：  
     ![image](https://user-images.githubusercontent.com/30925759/204125536-a7f8bbd2-11a7-4471-a76e-6721d4eec050.png)  
+    
     a.修改`extlinux`目录下的`extlinux.conf`文件：前三行不变，之后的行全用`#`注释，修改`# aml s9xxx`处，新增加一条`FDT /dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb`，解除`APPEND`那行的注释  
     ![image](https://user-images.githubusercontent.com/30925759/204125773-88adca97-f9c9-44f4-ace0-2188b7ebf514.png)  
+    
     b.把U盘根目录下的`u-boot-s905x-s912`重命名为`u-boot.ext`  
     
     (3)安装armbian系统，把armbian系统写入EMMC  
@@ -86,39 +88,65 @@ fastboot reboot
     重启后，N1会从U盘启动并进入armbian系统（N1现在已经是优先从U盘启动）  
     也可以，先断电源，将U盘插入靠近HDMI的USB口，插入网线、HDMI，**不要插入键盘鼠标**，再插入电源后设备启动。  
     断电重启N1，N1同样会从U盘启动并进入armbian系统  
-    ```
-    如果在开机画面卡死，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
-    如果进入了recovery界面，大概率是U盘不行，需要换个好一点的U盘试试  
-    如果没有从U盘启动，还是启动进入了斐讯系统，则使用adb命令重启设备再一次尝试从U盘启动  
-    如果由开机画面进入黑屏，持续长时间几分钟，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
-    如果闪屏（开机画面->黑屏->开机画面->黑屏...），需要拔掉键盘鼠标  
-    ```
-    b.在设备重新启动后，出现斐讯开机画面，之后会黑屏一会儿（此时正在从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动加载进入armbian系统  
+    
+    > 如果在开机画面卡死，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
+    > 如果进入了android recovery界面，大概率是U盘不行，需要换个好一点的U盘试试  
+    > 如果没有从U盘启动，还是启动进入了斐讯系统，则使用adb命令重启设备再一次尝试从U盘启动  
+    > 如果由开机画面进入黑屏，持续长时间几分钟，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
+    > 如果闪屏（开机画面->黑屏->开机画面->黑屏...），需要拔掉键盘鼠标  
+    
+    b.在设备重新启动后，出现斐讯开机画面，之后会黑屏一会儿（此时正在从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动初始化加载armbian系统  
     ![image](https://user-images.githubusercontent.com/30925759/204523053-61a8968d-4672-439f-be23-b9707635694a.png)  
-    亮屏后自动加载armbian  
+    亮屏后自动初始化加载armbian  
     ![image](https://user-images.githubusercontent.com/30925759/204522793-08543010-d2de-4946-ac73-73c36bfbf3b8.png)  
     进入armbian  
     ![image](https://user-images.githubusercontent.com/30925759/204522617-99c763a1-5618-475e-80da-334772da7c8e.png)  
+    
     c.设置root的新密码，**此时可以插入键盘鼠标了**    
+    
     d.将armbian系统从U盘写入N1的emmc    
     执行`./install-aml.sh`  
     ![image](https://user-images.githubusercontent.com/30925759/204523599-5df3a31c-6112-457a-87b2-7eca6ea71b2e.png)  
-    e.执行`poweroff`，拔出u盘，拔掉键盘鼠标，在插入电源重新开机  
+    
+    e.执行`poweroff`关机，拔出u盘，拔掉键盘鼠标，在插入电源重新开机  
     **注意，只能在N1开机后插入键盘鼠标，否则会出现闪屏或者黑屏无法启动的情况**  
+    如果这时出现开不了机或者在初始化加载出现“random: crng init done”的情况，插上用U盘，断电10秒后重启，多试几次，或者先刷低版本成功后再刷高版本，无需线刷回Android系统。      
+    
+    > 关于**重装系统**  
+    > 写入emmc后，系统将优先从EMMC启动。如果想改为优先从U盘启动，需要修改`/boot/extlinux/extlinux.conf`文件，把`ROOT_EMMC`改为`ROOTFS`，再插上U盘，重启即可    
+    > ![image](https://user-images.githubusercontent.com/30925759/204547998-a5c0fc47-76fe-498e-b310-21603d701d08.png)    
+    
+    f.修改设备树dtb文件，降低负载（也可以在安装armbian前，用现成的dtb文件替换掉U盘中/dtb/amlogic下的meson-gxl-s905d-phicomm-n1.dtb文件，替换文件前要先备份）  
+    ```
+    #新建文件夹newdtb
+    mkdir /root/newdtb
+    #备份固件自带的dtb文件
+    cp -a /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb.bak
+    #反编译固件自带的dtb文件
+    dtc -I dtb -O dts -o /root/newdtb/meson-gxl-s905d-phicomm-n1.dts /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb
+    #对反编译出的dts文件进行编辑。搜索9880，注释phandle =< 0x21 >行（也就是第262行）
+    vim /root/newdtb/meson-gxl-s905d-phicomm-n1.dts
+    #编译出新dtb文件
+    dtc -I dts -O dtb -o /root/newdtb/meson-gxl-s905d-phicomm-n1.dtb /root/newdtb/meson-gxl-s905d-phicomm-n1.dts
+    #覆盖固件自带的dtb文件
+    cp /root/newdtb/meson-gxl-s905d-phicomm-n1.dtb /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb
+    #重启
+    reboot
+    ```
+    
     至此，armbian已经安装成功。  
-    f.修改设备树dtb文件  
-    对于N1，如果U盘启动或写入emmc开不了机，重新用U盘再写一次，或换成旧版本刷一次就好，无需重新线刷n1到Android。此时系统将从内部EMMC启动，对于想一直从外部启动的，要修改EMMC中的/boot/extlinux目录下的extlinux.conf文件中，ROOT_EMMC改为ROOTFS，插上外部系统盘，重启即可。  
     
     (4)安装后的优化配置  
     - A.使用`armbian-config`图形化界面配置wifi  
         菜单路径【Network-WiFi】  
+        如果没有WiFi菜单，执行`apt install network-manager`重装network-manager  
         
     - B.使用`armbian-config`图形化界面配置ssh  
         菜单路径【System-SSH】  
         ![image](https://user-images.githubusercontent.com/30925759/168535411-c45c3626-2d2b-4c85-ae8d-15d2816bc7b8.png)
 
     - C.使用`armbian-config`图形化界面配置时区  
-        菜单路径【Persion-Timezone】  
+        菜单路径【Persion-Timezone】，选择shanghai  
         
     - D.使用`armbian-config`图形化界面配置语言  
         安装中文字体，文泉驿正黑`apt-get install fonts-wqy-zenhei`，文泉驿微米黑`apt-get install fonts-wqy-microhei`，google思源字体`apt-get install fonts-noto-cjk`  
@@ -136,9 +164,11 @@ fastboot reboot
         
     - E.使用`armbian-config`图形化界面更新系统  
         菜单路径【System-Firmware】，可能会失败，一般重复多试几次就可以了。  
-        也可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致，有的系统版本可以直接用`armbian-config`换镜像源，“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”。    
-        也可以指定下docker官方源，例如Ubuntu的，参考官方文档`https://docs.docker.com/engine/install/ubuntu/`，复制粘贴命令跑下就可以了  
-        ![image](https://user-images.githubusercontent.com/30925759/173090104-9781c858-0273-47ad-bae2-2a380d8061b8.png)
+        不要直接执行`apt update && apt upgrade`，特别是在选“Y”时要特别注意，否则会更改适配N1的系统配置。  
+        可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致。  
+        有的系统armbian-config版本可以直接用`armbian-config`图形化界面换镜像源，路径是“armbian-config -> Person -> Mirrors -> 选一个源 -> Ok”。如果没有Mirrors菜单，执行`apt install armbian-config`更新升级armbian-config软件版本。执行`apt list --installed armbian-config`查看当前已安装版本。    
+        同时，也可以指定下docker官方源，例如Ubuntu的，参考官方文档`https://docs.docker.com/engine/install/ubuntu/`，复制粘贴命令跑下就可以了  
+        ![image](https://user-images.githubusercontent.com/30925759/173090104-9781c858-0273-47ad-bae2-2a380d8061b8.png)  
         
     - F.使用`armbian-config`图形化界面安装docker  
         菜单路径【Software-Softy】，选中docker，Install回车进行安装  
