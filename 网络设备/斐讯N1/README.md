@@ -76,7 +76,8 @@ fastboot reboot
     打开刻录好的U盘根目录，如下图所示：  
     ![image](https://user-images.githubusercontent.com/30925759/204125536-a7f8bbd2-11a7-4471-a76e-6721d4eec050.png)  
     
-    a.修改`extlinux`目录下的`extlinux.conf`文件：前三行不变，之后的行全用`#`注释；修改“# aml s9xxx”处，新增加一条`FDT /dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb`，解除`APPEND`那行的注释  
+    a.修改`extlinux`目录下的`extlinux.conf`文件：  
+    前三行不变，之后的行全用`#`注释；修改“# aml s9xxx”处，新增加一条`FDT /dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb`，解除`APPEND`那行的注释  
     ![image](https://user-images.githubusercontent.com/30925759/204125773-88adca97-f9c9-44f4-ace0-2188b7ebf514.png)  
     
     b.把U盘根目录下的`u-boot-s905x-s912`重命名为`u-boot.ext`  
@@ -95,7 +96,7 @@ fastboot reboot
     
     b.<a id="install-armbian-b">在设备重新启动后</a>，显示器出现斐讯开机画面，之后会黑屏一会儿（此时正从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动加载armbian系统  
     ![image](https://user-images.githubusercontent.com/30925759/204523053-61a8968d-4672-439f-be23-b9707635694a.png)  
-    亮屏后开机引导会自动初始化加载armbian，**此时可以插入键盘鼠标了（一定要快，不要等进入armbian控制台界面后再插入，否则控制台可能会出现加载error情况）**  
+    亮屏后，开机引导会自动初始化加载armbian，**此时可以插入键盘鼠标了（一定要快，不要等进入armbian控制台界面后再插入，否则控制台可能会出现加载error情况）**  
     ![image](https://user-images.githubusercontent.com/30925759/204522793-08543010-d2de-4946-ac73-73c36bfbf3b8.png)  
     开机引导执行完了后，进入armbian，设置root的新密码，语言区域，创建新用户等  
     ![image](https://user-images.githubusercontent.com/30925759/204522617-99c763a1-5618-475e-80da-334772da7c8e.png)  
@@ -115,11 +116,11 @@ fastboot reboot
     d.将armbian系统从U盘写入N1的emmc，执行命令`./install-aml.sh`  
     ![image](https://user-images.githubusercontent.com/30925759/204847570-3aaa05ce-d181-46cd-956f-4227e170ad25.png)  
     
-    e.执行`poweroff`关机，拔出u盘，拔掉键盘鼠标，在插入电源重新开机  
+    e.执行`poweroff`关机，拔出u盘，**拔掉键盘鼠标**，再插入电源重新开机  
     **注意，只能在N1开机后插入键盘鼠标，否则会出现闪屏或者黑屏无法启动的情况**       
     查看系统版本信息`cat /etc/lsb-release`、`cat /etc/issue`  
     
-    > 关于**重装系统**  
+    > 关于***重装系统***  
     > 写入emmc后，系统将优先从EMMC启动。如果想改为优先从U盘启动，需要修改`/boot/extlinux/extlinux.conf`文件，把`ROOT_EMMC`改为`ROOTFS`，再插上U盘，**不要插入键盘鼠标**，重启系统，<a href="#install-armbian-b">N1会从U盘启动并进入armbian系统</a>       
     > ![image](https://user-images.githubusercontent.com/30925759/204547998-a5c0fc47-76fe-498e-b310-21603d701d08.png)    
     
