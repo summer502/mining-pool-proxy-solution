@@ -1,10 +1,10 @@
 > 一. 斐讯原版系统降级操作  
 > 二. 刷机  
 > 三. 安装v2ray客户端  
-
 <br/>
+
 一. 斐讯原版系统降级操作  
-参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/  
+参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/    
 如果刷机失败，参考教程【FX刷机失败，救砖工具】里面的救砖操作。   
 在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”时，要换成刷armbian镜像。  
 
