@@ -1,4 +1,8 @@
+> 一. 斐讯原版系统降级操作  
+> 二. 刷机  
+> 三. 安装v2ray客户端  
 
+<br/>
 一. 斐讯原版系统降级操作  
 参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/  
 如果刷机失败，参考教程【FX刷机失败，救砖工具】里面的救砖操作。   
@@ -95,30 +99,28 @@ fastboot reboot
     > 如果由开机画面进入黑屏，持续长时间几分钟，可以断电重启N1，拔掉键盘鼠标，只插HDMI和u盘，断电5秒后在插入电源  
     > 如果闪屏（开机画面->黑屏->开机画面->黑屏...），需要拔掉键盘鼠标  
     
-    b.在设备重新启动后，出现斐讯开机画面，之后会黑屏一会儿（此时正在从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动初始化加载armbian系统  
+    b.<a id="install-armbian-b">在设备重新启动后</a>，显示器出现斐讯开机画面，之后会黑屏一会儿（此时正在从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动初始化加载armbian系统  
     ![image](https://user-images.githubusercontent.com/30925759/204523053-61a8968d-4672-439f-be23-b9707635694a.png)  
     亮屏后自动初始化加载armbian  
     ![image](https://user-images.githubusercontent.com/30925759/204522793-08543010-d2de-4946-ac73-73c36bfbf3b8.png)  
-    进入armbian  
+    开机引导执行完了后，进入armbian  
     ![image](https://user-images.githubusercontent.com/30925759/204522617-99c763a1-5618-475e-80da-334772da7c8e.png)  
     
     c.设置root的新密码，**此时可以插入键盘鼠标了**    
     
-    d.将armbian系统从U盘写入N1的emmc    
-    执行`./install-aml.sh`  
+    d.将armbian系统从U盘写入N1的emmc，执行命令`./install-aml.sh`  
     ![image](https://user-images.githubusercontent.com/30925759/204523599-5df3a31c-6112-457a-87b2-7eca6ea71b2e.png)  
     
     e.执行`poweroff`关机，拔出u盘，拔掉键盘鼠标，在插入电源重新开机  
     **注意，只能在N1开机后插入键盘鼠标，否则会出现闪屏或者黑屏无法启动的情况**  
     如果这时出现开不了机或者在初始化加载出现“random: crng init done”的情况，插上用U盘，断电10秒后重启，多试几次，或者先刷低版本成功后再刷高版本，无需线刷回Android系统。      
-    查看版本信息`cat /etc/lsb-release`    
-    `cat /etc/issue`  
+    查看系统版本信息`cat /etc/lsb-release`、`cat /etc/issue`  
     
     > 关于**重装系统**  
-    > 写入emmc后，系统将优先从EMMC启动。如果想改为优先从U盘启动，需要修改`/boot/extlinux/extlinux.conf`文件，把`ROOT_EMMC`改为`ROOTFS`，再插上U盘，重启即可    
+    > 写入emmc后，系统将优先从EMMC启动。如果想改为优先从U盘启动，需要修改`/boot/extlinux/extlinux.conf`文件，把`ROOT_EMMC`改为`ROOTFS`，再插上U盘，重启系统，<a href="#install-armbian-b">N1会从U盘启动并进入armbian系统</a>       
     > ![image](https://user-images.githubusercontent.com/30925759/204547998-a5c0fc47-76fe-498e-b310-21603d701d08.png)    
     
-    f.修改设备树dtb文件，降低负载（也可以在安装armbian前，用现成的dtb文件替换掉U盘中/dtb/amlogic下的meson-gxl-s905d-phicomm-n1.dtb文件，替换文件前要先备份）  
+    f.修改设备树dtb文件，降低cpu负载（也可以在安装armbian前，用现成的dtb文件替换掉U盘中/dtb/amlogic下的meson-gxl-s905d-phicomm-n1.dtb文件，替换文件前要先备份）  
     ```
     #新建文件夹newdtb
     mkdir /root/newdtb
@@ -152,12 +154,12 @@ fastboot reboot
         菜单路径【Personal-Timezone】，选择shanghai  
         
     - D.使用`armbian-config`图形化界面配置语言和区域  
-        > 设置中文环境时要安装中文字体，否则中文会乱码。文泉驿正黑`apt-get install fonts-wqy-zenhei`，文泉驿微米黑`apt-get install fonts-wqy-microhei`，google思源字体`apt-get install fonts-noto-cjk`  
-        > 更新字体缓存`fc-cache -v`  
-        > 安装中文字体后，需要重启系统`reboot`  
+        > 设置中文环境时要安装中文字体，否则中文会乱码。中文语言包`apt-get install language-pack-zh-han*`，文泉驿正黑`apt-get install fonts-wqy-zenhei`，文泉驿微米黑`apt-get install fonts-wqy-microhei`，google思源字体`apt-get install fonts-noto-cjk`；  
+        > 安装字体时，会同时安装依赖软件包`fontconfig`；  
+        > 安装中文字体后，需要更新字体缓存`fc-cache -v`，或者重启系统`reboot`。  
         
         菜单路径【Personal-Locales】，按“上下键”、“空格键”和“Tab键”来切换、选中或取消选中对应的选项，选中“en_US.UTF-8”、“zh_CN.GBK”、“zh_CN.UTF-8”，Ok回车进入下一步  
-        locale的命名规则为<语言>_<地区>.<字符集编码>，如zh_CN.UTF-8，zh代表中文，CN代表大陆地区，UTF-8表示字符集。  
+        *locale的命名规则为<语言>_<地区>.<字符集编码>，如zh_CN.UTF-8，zh代表中文，CN代表大陆地区，UTF-8表示字符集。*  
         ![image](https://user-images.githubusercontent.com/30925759/168517724-9c527cd3-853f-4cd5-bae3-a073e2252bf2.png)  
         默认“语言_地区.字符集”选择“en_US.UTF-8”  
         ![image](https://user-images.githubusercontent.com/30925759/168517771-eaaef55e-7db8-4e13-99d3-56eace8f4d63.png)  
@@ -192,7 +194,7 @@ fastboot reboot
         ![image](https://user-images.githubusercontent.com/30925759/168537798-5b88485f-698d-4b37-8b32-516199a3411d.png)  
         
     - G.关闭日志服务写入emmc，延长emmc寿命  
-        使用zram磁盘      
+        系统使用了zram磁盘      
         ![image](https://user-images.githubusercontent.com/30925759/168519447-21219e8a-7c76-4573-9fbf-ecb5eb971e70.png)  
         编辑`armbian-ramlog`文件，`vim /etc/default/armbian-ramlog`，true是开启，false是关闭  
         ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)  
