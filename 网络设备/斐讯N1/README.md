@@ -1,9 +1,16 @@
+# 斐讯N1(Phicomm-N1)刷机
+
+下图是传说中的斐讯N1S（从恩山扣的图）  
+![image](https://user-images.githubusercontent.com/30925759/205446154-42a7c0f6-81b4-4f46-9662-2775cf5455a2.png "斐讯N1S")    
+<br/>
+
+> 
 > 一. 斐讯原版系统降级操作  
 > 二. 刷机  
 > 三. 安装v2ray客户端  
 <br/>
 
-一. 斐讯原版系统降级操作  
+## 一. 斐讯原版系统降级操作  
 参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/    
 如果刷机失败，参考教程【FX刷机失败，救砖工具】里面的救砖操作。   
 在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”时，要换成刷armbian镜像。  
@@ -49,7 +56,7 @@ fastboot flash recovery  recovery.img
 fastboot reboot
 ```
 
-二. 刷机  
+## 二. 刷机  
 
 ``` markdown
     1. 刷入armbian系统
@@ -69,6 +76,9 @@ fastboot reboot
     ![image](https://user-images.githubusercontent.com/30925759/204129696-1e12cbca-8273-4ba4-87c2-417a306ff5f6.png)  
     刻录完成后，在“我的电脑-管理-计算机管理-磁盘管理”页面，看到有2个磁盘分区，其中一个是以“BOOT”为卷标的  
     ![image](https://user-images.githubusercontent.com/30925759/204141539-beed3851-1e9f-4046-abae-22a2c118d6e2.png)  
+    
+    这个固件更新
+    https://github.com/ophub/amlogic-s9xxx-armbian/blob/main/README.cn.md  
     
     (2)配置n1的armbian安装参数  
     **注意，以下步骤适用于Armbian 20.08及之后的版本**    
@@ -233,7 +243,7 @@ n1就一个网口，直接用newifi刷机了。:joy:<br>
     <br>谛听newifi路由器<br>
     ![image](https://user-images.githubusercontent.com/30925759/168520678-8706de67-81aa-47ce-b2eb-ef6a4e23d597.png)
     
-三. 安装v2ray客户端  
+## 三. 安装v2ray客户端  
 参考：https://guide.v2fly.org/  
 
 > 1. [使用docker安装](#v2ray-docker)  
