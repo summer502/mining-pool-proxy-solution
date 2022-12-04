@@ -223,7 +223,11 @@ fastboot reboot
         > - 有2个systemd服务，开机会创建zram盘，然后从emmc的/var/log.hdd中load数据到zram的/var/log路径下，完成开机初始化。  
         >     1. “Armbian ZRAM configuration service”，查看`/lib/systemd/system/armbian-zram-config.service`文件。  
         >     ![image](https://user-images.githubusercontent.com/30925759/205500455-e222efb9-d073-458d-9c7b-de2c7fa03569.png)   
-        >     （禁用zram服务，修改文件/etc/default/armbian-zram-config，改为：ENABLED=false）  
+        >     查看`/usr/lib/armbian/armbian-zram-config`
+        >     ![image](https://user-images.githubusercontent.com/30925759/205507229-9ddf21be-ecce-421e-a2de-fbaef320cb90.png)  
+        >     （activate_zram_swap  禁用zram服务，修改文件/etc/default/armbian-zram-config，改为：ENABLED=false）  
+        >     查看`/etc/default/armbian-zram-config`  
+        >     ![image](https://user-images.githubusercontent.com/30925759/205507307-bf8170d9-eccc-4741-914d-3fbba2d128f3.png)  
         >     
         >     2. “Armbian ramlog service”，查看`/lib/systemd/system/armbian-ramlog.service`文件。  
         >     ![image](https://user-images.githubusercontent.com/30925759/205500175-a9dbb01d-5a69-480e-b21f-1f4debc9c972.png)  
