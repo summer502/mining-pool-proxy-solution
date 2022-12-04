@@ -118,7 +118,7 @@ fastboot reboot
     > 如果闪屏（开机画面->黑屏->开机画面->黑屏...），需要拔掉键盘鼠标。  
     > 如果出现开不了机（显示器黑屏无响应），或者在开机引导初始化加载时出现“random: crng init done”进入了`initramfs`模式，插上用U盘，断电10秒后重启，多试几次，或者重新刻录U盘再试，或者先刷低版本成功后再刷高版本，无需线刷回Android系统。  
     
-    c.检查文件权限owner是否是root，如果被修改了，只能重新刻录U盘，再重新安装    
+    c.检查文件权限owner是否是root，如果被修改了，只能重新刻录U盘，再重新安装系统    
     解决方案参考：https://github.com/ophub/amlogic-s9xxx-armbian/issues/501  
     下图所示，这里文件所有者被改成了1023，应该是在Android系统运行时，插入了U盘，导致文件和目录权限被Android系统修改了  
     ![image](https://user-images.githubusercontent.com/30925759/204846918-47ce9578-459f-4248-b495-5aef41924100.png)  
@@ -142,8 +142,13 @@ fastboot reboot
     cp -a /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb.bak
     #反编译固件自带的dtb文件
     dtc -I dtb -O dts -o /root/newdtb/meson-gxl-s905d-phicomm-n1.dts /boot/dtb/amlogic/meson-gxl-s905d-phicomm-n1.dtb
+    ```
+    ```
     #对反编译出的dts文件进行编辑。搜索9880，注释phandle =< 0x21 >行（也就是第262行）
     vim /root/newdtb/meson-gxl-s905d-phicomm-n1.dts
+    ```
+    ![image](https://user-images.githubusercontent.com/30925759/205490607-4ce27c79-c74c-4727-a02d-5ca39cbe2cdd.png)  
+    ```
     #编译出新dtb文件
     dtc -I dts -O dtb -o /root/newdtb/meson-gxl-s905d-phicomm-n1.dtb /root/newdtb/meson-gxl-s905d-phicomm-n1.dts
     #覆盖固件自带的dtb文件
@@ -208,11 +213,83 @@ fastboot reboot
         ![image](https://user-images.githubusercontent.com/30925759/168537798-5b88485f-698d-4b37-8b32-516199a3411d.png)  
         
     - G.关闭日志服务写入emmc，延长emmc寿命  
-        系统使用了zram磁盘      
+        系统使用了zram磁盘，/dev/zram0是个内存盘，挂载到了/var/log，每15分钟检查一下/var/log使用率，超过75%时，会向eMMC磁盘同步一次日志数据    
         ![image](https://user-images.githubusercontent.com/30925759/168519447-21219e8a-7c76-4573-9fbf-ecb5eb971e70.png)  
-        编辑`armbian-ramlog`文件，`vim /etc/default/armbian-ramlog`，true是开启，false是关闭  
+        ![image](https://user-images.githubusercontent.com/30925759/205491315-ed311b9d-5f07-48d0-9e5e-0880b798d65f.png)
+        编辑`armbian-ramlog`文件，`vim /etc/default/armbian-ramlog`，ENABLED=true，true是开启，false是关闭  
         ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)  
         
+        发现系统做了1个systemd启动任务+2个cron任务用来解决这个问题，下面简单说一下原理。
+        2个cron任务
+        ![image](https://user-images.githubusercontent.com/30925759/205491845-24059212-32e3-4eef-8251-97c58a8d766b.png)  
+        每15分钟`/usr/lib/armbian/armbian-truncate-logs`  
+        ![image](https://user-images.githubusercontent.com/30925759/205491969-eb49f2d4-a149-44cd-9033-3e480184cdae.png)  
+        /usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1  
+        /usr/sbin/logrotate --force /etc/logrotate.conf  
+        
+        定期删除日志
+        cat /etc/cron.d/armbian-truncate-logs  
+        每15分钟就会执行一次truncate日志，这个脚本内容如下：  
+        其实就是看一下/var/log的zram盘是否利用率超过75%，一旦超过就扫描/var/log下面各种日志文件进行截断。  
+        另外，我们还看到它调用：/usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1  
+这个脚本的write命令会把/var/log内存盘的数据rsync到/var/log.hdd/目录，而/var/log.hdd目录是emmc上的一部分。因此，我们明白在truncate日志之前会先把当前最新日志持久化到emmc上，然后再把zram内存里的日志截断掉。    
+
+另外，这个脚本还调用了logrotate程序进行日志滚动，我详细看了一下logrotate配置文件，发现它归档的是/var/log.hdd里面的日志文件，其根本目的是为了配合zram -> emmc做rsync的时候可以结合rsync –delete选项删除掉归档的老日志文件，起到控制emmc容量的目的。（大家不理解可以不关心这一段逻辑）  
+
+所以呢，这个cron会导致每15分钟就会向emmc同步一次数据，并且缩小zram盘占用容量，这无疑是对emmc的频繁伤害。  
+        
+        
+        
+        每天  `armbian-ram-logging`   `logrotate`
+        ![image](https://user-images.githubusercontent.com/30925759/205492308-d9825b3f-3af2-4790-a378-f05467c5d280.png)  
+        /usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1  
+        /usr/sbin/logrotate /etc/logrotate.conf
+        
+另外还有一个天级cron是进行一次write同步，也是调用的如下同步命令：
+
+/usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1
+
+因此，最简单的就是让这个write操作失灵，不向emmc同步日志数据不就好了嘛。
+
+解决方法
+打开/usr/lib/armbian/armbian-ramlog脚本，它实际执行的是这个shell方法：
+
+syncToDisk () {
+    isSafe
+ 
+    echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
+ 
+    if [ "$USE_RSYNC" = true ]; then
+        ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
+    else
+        ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
+    fi
+ 
+    sync
+}
+只需要在函数头部返回即可避免rsync：
+
+syncToDisk () {
+    # no sync to protect emmc
+    return 0
+    isSafe
+ 
+    echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
+ 
+    if [ "$USE_RSYNC" = true ]; then
+        ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
+    else
+        ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
+    fi
+ 
+    sync
+}
+可以再观察一下/var/log与/var/log.hdd，会发现/var/log.hdd已经不再有后续数据更新，而/var/log仍旧会自动在75使用率的时候进行日志截断。
+
+最后补充，armbian做了一个systemd服务：/lib/systemd/system/armbian-ramlog.service，它开机会创建zram盘，然后从emmc的/var/log.hdd中load数据到zram的/var/log路径下，完成开机初始化。
+ 
+
+
         或者，关闭syslog系统日志服务  
         ```shell
         systemctl disable syslog
