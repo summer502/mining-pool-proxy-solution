@@ -219,67 +219,77 @@ fastboot reboot
         编辑`/etc/default/armbian-ramlog`文件，ENABLED=true，true是开启，false是关闭  
         ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)           
 
-        系统用了2个systemd启动任务和2个cron任务来解决eMMC日志问题，减少对eMMC的写入。   
-        - 2个systemd服务，开机会创建zram盘，然后从emmc的/var/log.hdd中load数据到zram的/var/log路径下，完成开机初始化。  
-            1. “Armbian ZRAM configuration service”，查看`/lib/systemd/system/armbian-zram-config.service`文件。  
-            ![image](https://user-images.githubusercontent.com/30925759/205500455-e222efb9-d073-458d-9c7b-de2c7fa03569.png)   
-            2. “Armbian ramlog service”，查看`/lib/systemd/system/armbian-ramlog.service`文件。  
-            ![image](https://user-images.githubusercontent.com/30925759/205500175-a9dbb01d-5a69-480e-b21f-1f4debc9c972.png)  
-        - 2个cron任务，定期清理日志  
-        ![image](https://user-images.githubusercontent.com/30925759/205491845-24059212-32e3-4eef-8251-97c58a8d766b.png)  
-            1. 每15分钟定时任务。查看定时任务`/etc/cron.d/armbian-truncate-logs`文件，每15分钟执行一次`/usr/lib/armbian/armbian-truncate-logs`脚本  
-            ![image](https://user-images.githubusercontent.com/30925759/205491969-eb49f2d4-a149-44cd-9033-3e480184cdae.png)  
-            查看`/usr/lib/armbian/armbian-truncate-logs`
-            ![image](https://user-images.githubusercontent.com/30925759/205491315-ed311b9d-5f07-48d0-9e5e-0880b798d65f.png)  
-            ```shell。
-            #看一下/var/log的zram盘是否利用率超过75%，一旦超过就扫描/var/log下面各种日志文件进行截断，这个cron会导致每15分钟就会向emmc同步一次数据，并且缩小zram盘占用容量，这无疑是对emmc的频繁伤害
-            # write to SD，write命令会把/var/log内存盘的数据rsync到/var/log.hdd目录
-            /usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1  
-            # rotate logs on "disk"，调用了logrotate程序进行日志滚动，我详细看了一下logrotate配置文件，发现它归档的是/var/log.hdd里面的日志文件，其根本目的是为了配合zram -> emmc做rsync的时候可以结合rsync –delete选项删除掉归档的老日志文件，起到控制emmc容量的目的。（大家不理解可以不关心这一段逻辑）  
-            /usr/sbin/logrotate --force /etc/logrotate.conf  
-            # truncate，在truncate日志之前会先把当前最新日志持久化到emmc上，然后再把zram内存里的日志截断掉。  
-            # remove   
-            ```
-            2. 每天定时任务。查看定时任务`/etc/cron.daily/armbian-ram-logging`文件，每天执行一次`/usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1`   
-            3. 每天定时任务。查看定时任务`/etc/cron.daily/logrotate`文件，每天执行一次`/usr/sbin/logrotate /etc/logrotate.conf`    
-            ![image](https://user-images.githubusercontent.com/30925759/205492308-d9825b3f-3af2-4790-a378-f05467c5d280.png)  
-                    
-            ```
-            解决方法
-            打开/usr/lib/armbian/armbian-ramlog脚本，它实际执行的是这个shell方法：
-            
-            syncToDisk () {
-                isSafe
-             
-                echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
-             
-                if [ "$USE_RSYNC" = true ]; then
-                    ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
-                else
-                    ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
-                fi
-             
-                sync
-            }
-            只需要在函数头部返回即可避免rsync：
-            
-            syncToDisk () {
-                # no sync to protect emmc
-                return 0
-                isSafe
-             
-                echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
-             
-                if [ "$USE_RSYNC" = true ]; then
-                    ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
-                else
-                    ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
-                fi
-             
-                sync
-            }
-            可以再观察一下/var/log与/var/log.hdd，会发现/var/log.hdd已经不再有后续数据更新，而/var/log仍旧会自动在75使用率的时候进行日志截断。  
-            ```
+        > 系统用了2个systemd启动任务和3个cron任务来解决eMMC日志问题：   
+        > - 有2个systemd服务，开机会创建zram盘，然后从emmc的/var/log.hdd中load数据到zram的/var/log路径下，完成开机初始化。  
+        >     1. “Armbian ZRAM configuration service”，查看`/lib/systemd/system/armbian-zram-config.service`文件。  
+        >     ![image](https://user-images.githubusercontent.com/30925759/205500455-e222efb9-d073-458d-9c7b-de2c7fa03569.png)   
+        >     （禁用zram服务，修改文件/etc/default/armbian-zram-config，改为：ENABLED=false）  
+        >     
+        >     2. “Armbian ramlog service”，查看`/lib/systemd/system/armbian-ramlog.service`文件。  
+        >     ![image](https://user-images.githubusercontent.com/30925759/205500175-a9dbb01d-5a69-480e-b21f-1f4debc9c972.png)  
+        >     
+        > - 有3个crontab任务，定期清理日志。  
+        > ![image](https://user-images.githubusercontent.com/30925759/205491845-24059212-32e3-4eef-8251-97c58a8d766b.png)  
+        >     1. 每15分钟定时任务。查看定时任务`/etc/cron.d/armbian-truncate-logs`文件。  
+        >     每15分钟执行一次`/usr/lib/armbian/armbian-truncate-logs`脚本  
+        >     ![image](https://user-images.githubusercontent.com/30925759/205491969-eb49f2d4-a149-44cd-9033-3e480184cdae.png)  
+        >     查看`/usr/lib/armbian/armbian-truncate-logs`  
+        >     ![image](https://user-images.githubusercontent.com/30925759/205491315-ed311b9d-5f07-48d0-9e5e-0880b798d65f.png)  
+        >         ```shell
+        >         # 1.使用df命令看一下/var/log目录的利用率是否超过75%
+        >         # 2.write to SD，调用/usr/lib/armbian/armbian-ramlog脚本，传入参数write，把/var/log内存盘的数据rsync到/var/log.hdd目录
+        >         /usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1
+        >         # 3.rotate logs on "disk"，使用logrotate命令，指定/etc/logrotate.conf配置文件，强制进行日志滚动
+        >         /usr/sbin/logrotate --force /etc/logrotate.conf
+        >         # 4.truncate
+        >         # 5.remove
+        >         ```
+        >     
+        >     2. 每天定时任务。查看定时任务`/etc/cron.daily/armbian-ram-logging`文件。  
+        >     每天执行一次`/usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1`脚本   
+        >     ![image](https://user-images.githubusercontent.com/30925759/205492308-d9825b3f-3af2-4790-a378-f05467c5d280.png)  
+        >     
+        >     3. 每天定时任务。查看定时任务`/etc/cron.daily/logrotate`文件。  
+        >     每天执行一次`/usr/sbin/logrotate /etc/logrotate.conf`命令    
+        >     ![image](https://user-images.githubusercontent.com/30925759/205505679-3dcc727e-1f35-4623-9d47-6c58b0ce7f30.png)  
+        >     
+        >             
+        >     ```
+        >     解决方法
+        >     打开/usr/lib/armbian/armbian-ramlog脚本，它实际执行的是这个shell方法：
+        >     
+        >     syncToDisk () {
+        >         isSafe
+        >      
+        >         echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
+        >      
+        >         if [ "$USE_RSYNC" = true ]; then
+        >             ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
+        >         else
+        >             ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
+        >         fi
+        >      
+        >         sync
+        >     }
+        >     只需要在函数头部返回即可避免rsync：
+        >     
+        >     syncToDisk () {
+        >         # no sync to protect emmc
+        >         return 0
+        >         isSafe
+        >      
+        >         echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
+        >      
+        >         if [ "$USE_RSYNC" = true ]; then
+        >             ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
+        >         else
+        >             ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
+        >         fi
+        >      
+        >         sync
+        >     }
+        >     可以再观察一下/var/log与/var/log.hdd，会发现/var/log.hdd已经不再有后续数据更新，而/var/log仍旧会自动在75使用率的时候进行日志截断。  
+        >     ```
 
         或者，关闭syslog系统日志服务  
         ```shell
