@@ -158,7 +158,7 @@ fastboot reboot
     reboot
     ```
     
-    至此，armbian已经安装成功。  
+    至此，armbian系统已经安装成功。  
     
     (4)安装后的优化配置  
     - A.使用`armbian-config`图形化界面更新系统  
@@ -217,23 +217,31 @@ fastboot reboot
         系统使用了zram磁盘，/dev/zram0是个内存盘，挂载到了/var/log，每15分钟检查一下/var/log使用率，超过75%时，会向eMMC磁盘/var/log.hdd同步一次日志数据    
         ![image](https://user-images.githubusercontent.com/30925759/168519447-21219e8a-7c76-4573-9fbf-ecb5eb971e70.png)  
         编辑`/etc/default/armbian-ramlog`文件，ENABLED=true，true是开启，false是关闭  
-        ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)           
-
+        ![image](https://user-images.githubusercontent.com/30925759/168515966-6c212e0d-97fb-4d00-9ec9-00ebfce4c6d8.png)     
+        
+        或者编辑`/usr/lib/armbian/armbian-ramlog`这个脚本。修改`syncToDisk ()`，直接`return 0`。脚本中有提示不建议这样做“**# Never touch anything below here. Only edit /etc/default/armbian-ramlog**”。  
+        
         > 系统用了2个systemd启动任务和3个cron任务来解决eMMC日志问题：   
-        > - 有2个systemd服务，开机会创建zram盘，然后从emmc的/var/log.hdd中load数据到zram的/var/log路径下，完成开机初始化。  
+        > - 有2个systemd服务，开机初始化时会配置zram0盘，挂载/var/log，然后从emmc的/var/log.hdd中加载数据到zram0的/var/log路径下，检查是否安装了一些常用应用服务并创建日志目录和文件。  
         >     1. “Armbian ZRAM configuration service”，查看`/lib/systemd/system/armbian-zram-config.service`文件。  
+        >     启动时会执行`/usr/lib/armbian/armbian-zram-config`脚本  
         >     ![image](https://user-images.githubusercontent.com/30925759/205500455-e222efb9-d073-458d-9c7b-de2c7fa03569.png)   
-        >     查看`/usr/lib/armbian/armbian-zram-config`
+        >     查看`/usr/lib/armbian/armbian-zram-config`  
+        >     *①、activate_zram_swap，配置swap分区，把zram1设为swap分区。如果要禁用zram swap服务，修改文件/etc/default/armbian-zram-config，改ENABLED=false。对于小内存设备应该启用zram swap，可以另新增加个1GB的swap来扩容swap空间，在eMMC或者USB存储设备上创建个低优先级的swap分区。*  
+        >     ![image](https://user-images.githubusercontent.com/30925759/205613974-a0a517ce-52f3-4651-9c37-6f7cba348979.png)  
+        >     *②、activate_ramlog_partition，把zram0格式化作为/var/log。*  
+        >     *③、activate_compressed_tmp，把zram2挂到/tmp。*  
         >     ![image](https://user-images.githubusercontent.com/30925759/205507229-9ddf21be-ecce-421e-a2de-fbaef320cb90.png)  
-        >     （activate_zram_swap  禁用zram服务，修改文件/etc/default/armbian-zram-config，改为：ENABLED=false）  
         >     查看`/etc/default/armbian-zram-config`  
         >     ![image](https://user-images.githubusercontent.com/30925759/205507307-bf8170d9-eccc-4741-914d-3fbba2d128f3.png)  
         >     
         >     2. “Armbian ramlog service”，查看`/lib/systemd/system/armbian-ramlog.service`文件。  
+        >     启动时会执行`/usr/lib/armbian/armbian-ramlog`脚本  
         >     ![image](https://user-images.githubusercontent.com/30925759/205500175-a9dbb01d-5a69-480e-b21f-1f4debc9c972.png)  
         >     
         > - 有3个crontab任务，定期清理日志。  
         > ![image](https://user-images.githubusercontent.com/30925759/205491845-24059212-32e3-4eef-8251-97c58a8d766b.png)  
+        > ![image](https://user-images.githubusercontent.com/30925759/205565831-5c8e05fc-dea7-41b3-8b94-351106d428d4.png)  
         >     1. 每15分钟定时任务。查看定时任务`/etc/cron.d/armbian-truncate-logs`文件。  
         >     每15分钟执行一次`/usr/lib/armbian/armbian-truncate-logs`脚本  
         >     ![image](https://user-images.githubusercontent.com/30925759/205491969-eb49f2d4-a149-44cd-9033-3e480184cdae.png)  
@@ -241,9 +249,9 @@ fastboot reboot
         >     ![image](https://user-images.githubusercontent.com/30925759/205491315-ed311b9d-5f07-48d0-9e5e-0880b798d65f.png)  
         >         ```shell
         >         # 1.使用df命令看一下/var/log目录的利用率是否超过75%
-        >         # 2.write to SD，调用/usr/lib/armbian/armbian-ramlog脚本，传入参数write，把/var/log内存盘的数据rsync到/var/log.hdd目录
+        >         # 2.write to SD，调用/usr/lib/armbian/armbian-ramlog脚本，传入参数write，调用方法syncToDisk，把/var/log的数据同步到/var/log.hdd目录
         >         /usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1
-        >         # 3.rotate logs on "disk"，使用logrotate命令，指定/etc/logrotate.conf配置文件，强制进行日志滚动
+        >         # 3.rotate logs on "disk"，使用logrotate命令，指定/etc/logrotate.conf配置文件，对/var/log.hdd强制进行日志滚动转储
         >         /usr/sbin/logrotate --force /etc/logrotate.conf
         >         # 4.truncate
         >         # 5.remove
@@ -253,53 +261,9 @@ fastboot reboot
         >     每天执行一次`/usr/lib/armbian/armbian-ramlog write >/dev/null 2>&1`脚本   
         >     ![image](https://user-images.githubusercontent.com/30925759/205492308-d9825b3f-3af2-4790-a378-f05467c5d280.png)  
         >     
-        >     3. 每天定时任务。查看定时任务`/etc/cron.daily/logrotate`文件。  
+        >     3. 每天定时任务。查看定时任务`/etc/cron.daily/logrotate`文件。这个定时任务是linux自带的日志轮转，查看logrotate运行情况`cat /var/lib/logrotate/status`。  
         >     每天执行一次`/usr/sbin/logrotate /etc/logrotate.conf`命令    
         >     ![image](https://user-images.githubusercontent.com/30925759/205505679-3dcc727e-1f35-4623-9d47-6c58b0ce7f30.png)  
-        >     
-        >             
-        >     ```
-        >     解决方法
-        >     打开/usr/lib/armbian/armbian-ramlog脚本，它实际执行的是这个shell方法：
-        >     
-        >     syncToDisk () {
-        >         isSafe
-        >      
-        >         echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
-        >      
-        >         if [ "$USE_RSYNC" = true ]; then
-        >             ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
-        >         else
-        >             ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
-        >         fi
-        >      
-        >         sync
-        >     }
-        >     只需要在函数头部返回即可避免rsync：
-        >     
-        >     syncToDisk () {
-        >         # no sync to protect emmc
-        >         return 0
-        >         isSafe
-        >      
-        >         echo -e "\n\n$(date): Syncing logs from $LOG_TYPE to storage\n" | $LOG_OUTPUT
-        >      
-        >         if [ "$USE_RSYNC" = true ]; then
-        >             ${NoCache} rsync -aXWv --delete --exclude armbian-ramlog.log --links $RAM_LOG $HDD_LOG 2>&1 | $LOG_OUTPUT
-        >         else
-        >             ${NoCache} cp -rfup $RAM_LOG -T $HDD_LOG 2>&1 | $LOG_OUTPUT
-        >         fi
-        >      
-        >         sync
-        >     }
-        >     可以再观察一下/var/log与/var/log.hdd，会发现/var/log.hdd已经不再有后续数据更新，而/var/log仍旧会自动在75使用率的时候进行日志截断。  
-        >     ```
-
-        或者，关闭syslog系统日志服务  
-        ```shell
-        systemctl disable syslog
-        systemctl stop syslog
-        ```
         
     - H.关闭防火墙  
         默认状态已经是关闭了的。在自己用的内网环境中不需要开启防火墙  
@@ -313,7 +277,26 @@ fastboot reboot
         vim /etc/fstab  
         UUID=50C7117B50C50979 /mnt/hdd1T  ntfs  defaults,nofail,x-systemd.device-timeout=1,noatime 0 0  
         UUID=50C7117B50C50979  /mnt/sda1 ntfs defaults 0 1  
-    
+    - K.扩容swap  
+        ```
+        创建swapfile
+        dd if=/dev/zero of=/mnt/usb_netac/myswapfile bs=1M count=1024
+        格式化交换文件
+        mkswap /mnt/usb_netac/myswapfile
+        启用swap
+        chmod 0600 /mnt/usb_netac/myswapfile
+        swapon /mnt/usb_netac/myswapfile
+        查看swap
+        cat /proc/swaps或者swapon -s
+        释放swap
+        swapoff /mnt/usb_netac/myswapfile
+        写入/etc/fstab
+        /mnt/usb_netac/myswapfile swap swap defaults 0 0
+        ```
+        
+    - L.蓝牙  
+        参考 https://wiki.sipeed.com/soft/Lichee/zh/MaixSense/application/Usages.html 这个  
+
 2. 安装openwrt  
 n1就一个网口，直接用newifi刷机了。:joy:<br>
     openwrt下载：https://openwrt.org/
