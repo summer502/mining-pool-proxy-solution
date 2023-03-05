@@ -73,24 +73,24 @@ fastboot reboot
 
 1. 安装armbian  
 新装和重装系统都一样。装linux不需要用USB_Burning_Tool烧录。  
-    (1)刻录U盘镜像  
+    ### (1)刻录U盘镜像  
     **用个好一点的U盘，像Kingston、SanDisk，读写速度在10MB/s以上，最好接口是usb2.0的，用杂牌U盘可能会出现无法从U盘启动或者进入Android Recovery界面的情况**  
-    使用`balbes150`大神的armbian镜像  
-    系统镜像下载：https://users.armbian.com/balbes150/arm-64/  
-    ![image](https://user-images.githubusercontent.com/30925759/168515862-2e065d13-7c6a-4d34-8a30-829c287f6e5b.png)  
     
+    使用`balbes150`大神的armbian镜像，系统镜像下载：https://users.armbian.com/balbes150/arm-64/  
+    ![image](https://user-images.githubusercontent.com/30925759/168515862-2e065d13-7c6a-4d34-8a30-829c287f6e5b.png)  
     比如选择`Armbian_20.10_Arm-64_bullseye_current_5.9.0.img.xz`下载（N1的GPU性能不错，能跑4k解码，可以装Desktop版）  
-    解压后，用`USB Image Tool`或者`Win32DiskImager`或者`balenaEtcher`或者`Rufus`刻录  
+    解压`.xz`后，用`USB Image Tool`或者`Win32DiskImager`或者`balenaEtcher`或者`Rufus`刻录  
     ![image](https://user-images.githubusercontent.com/30925759/204129696-1e12cbca-8273-4ba4-87c2-417a306ff5f6.png)  
     刻录完成后，在“我的电脑-管理-计算机管理-磁盘管理”页面，看到有2个磁盘分区，其中一个是以“BOOT”为卷标的  
     ![image](https://user-images.githubusercontent.com/30925759/204141539-beed3851-1e9f-4046-abae-22a2c118d6e2.png)  
     
-    这个固件更新
+    `balbes150`已经不维护晶晨S905了。这个固件更新
     https://github.com/ophub/amlogic-s9xxx-armbian/blob/main/README.cn.md  
     
-    (2)配置n1的armbian安装参数  
+    ### (2)配置n1的armbian安装参数  
     **注意，以下步骤适用于Armbian 20.08及之后的版本**    
-    安装参考帖子：https://forum.armbian.com/topic/12162-single-armbian-image-for-rk-aml-aw-aarch64-armv8/  
+    安装可以参考帖子：https://forum.armbian.com/topic/12162-single-armbian-image-for-rk-aml-aw-aarch64-armv8/  
+    
     打开刻录好的U盘根目录，如下图所示：  
     ![image](https://user-images.githubusercontent.com/30925759/204125536-a7f8bbd2-11a7-4471-a76e-6721d4eec050.png)  
     
@@ -100,7 +100,7 @@ fastboot reboot
     
     b.把U盘根目录下的`u-boot-s905x-s912`重命名为`u-boot.ext`  
     
-    (3)安装armbian系统，把armbian系统写入EMMC  
+    ### (3)安装armbian系统，把armbian系统写入EMMC  
     a.将刻录好的U盘插入到斐讯的N1盒子靠近hdmi的USB口（**不要插入键盘鼠标**）   
     ![image](https://user-images.githubusercontent.com/30925759/204118410-299ad3b4-ded3-42b0-b77d-7c39b9cfc445.png)  
     使用adb命令重启设备  
@@ -114,7 +114,7 @@ fastboot reboot
     
     b.<a id="install-armbian-b">在设备重新启动后</a>，显示器出现斐讯开机画面，之后会黑屏一会儿（此时正从U盘加载数据，黑屏时间与U盘读写速度有关），等待亮屏后会自动加载armbian系统  
     ![image](https://user-images.githubusercontent.com/30925759/204523053-61a8968d-4672-439f-be23-b9707635694a.png)  
-    亮屏后，开机引导会自动初始化加载armbian，**此时可以插入键盘鼠标了（一定要快，不要等进入armbian控制台界面后再插入，否则控制台可能会出现加载error情况）**  
+    亮屏后，开机引导会自动初始化加载armbian，**此时可以插入键盘鼠标了（插入键盘鼠标一定要快，不要等进入armbian控制台界面后再插入，否则控制台可能会出现加载驱动error情况）**  
     ![image](https://user-images.githubusercontent.com/30925759/204522793-08543010-d2de-4946-ac73-73c36bfbf3b8.png)  
     开机引导执行完了后，进入armbian，设置root的新密码，语言区域，创建新用户等  
     ![image](https://user-images.githubusercontent.com/30925759/204522617-99c763a1-5618-475e-80da-334772da7c8e.png)  
@@ -135,7 +135,7 @@ fastboot reboot
     ![image](https://user-images.githubusercontent.com/30925759/204847570-3aaa05ce-d181-46cd-956f-4227e170ad25.png)  
     
     e.执行`poweroff`关机，拔出u盘，**拔掉键盘鼠标**，再插入电源重新开机  
-    **注意，只能在N1开机后插入键盘鼠标，否则会出现闪屏或者黑屏无法启动的情况**       
+    **注意，只能在N1开机后插入键盘鼠标，否则可能会出现闪屏或者黑屏无法启动的情况**       
     查看系统版本信息`cat /etc/lsb-release`、`cat /etc/issue`  
     
     > 关于***重装系统***  
