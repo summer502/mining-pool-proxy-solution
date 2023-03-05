@@ -12,20 +12,26 @@
 
 ## 一. 斐讯原版系统降级操作  
 参考***网心云***的教程【三方盒子(FX)刷机包】：https://www.onethingcloud.com/download-center/    
+![image](https://user-images.githubusercontent.com/30925759/222958426-fa576a72-455a-4e9f-a32a-f3547e283de0.png)
+需要注意的是，文件`s905_usb_burn_img_V3.1.7.zip`是网心云系统镜像包，文件`S905D-N1-Burning-Guide-V3.0.zip`是N1刷机工具包。  
+
+在***网心云***的[【安装教程】](https://help.onethingcloud.com/7cb4/3ed5/77f6)中，在步骤“***第六步：刷机***”时，要换成刷armbian镜像。  
 如果刷机失败，参考教程【FX刷机失败，救砖工具】里面的救砖操作。   
-在[安装教程](https://help.onethingcloud.com/7cb4/3ed5/77f6)中的步骤“第六步：刷机”时，要换成刷armbian镜像。  
+![image](https://user-images.githubusercontent.com/30925759/222958566-35780d09-38b8-4a8c-9393-c0a86b102bbb.png)  
 
-点击下载[刷机工具包](https://update.peiluyou.com/downloads/S905D-N1-Burning-Guide-V3.0.zip)，将工具包下载后解压；    
-![image](https://user-images.githubusercontent.com/30925759/204098246-2432b608-098f-40e2-b503-245e6c20620e.png)  
-需要注意的是，`s905_usb_burn_img_V3.1.7.zip`是网心云系统镜像包，`S905D-N1-Burning-Guide-V3.0.zip`是N1刷机工具包。  
-使用刷机工具包`S905D-N1-Burning-Guide-V3.0.zip`的整个过程操作：依次执行脚本，`第2步进入fasteboot.bat`-->`第3步检查是否可以降级.bat`-->`第4步降级.bat`-->`第5步降级完成后执行重启.bat`-->刻录U盘-->`第6步进入U盘模式开始刷机.bat`。  
+在***网心云***的[【安装教程】](https://help.onethingcloud.com/7cb4/3ed5/77f6)中，点击[【点击下载刷机工具包】](https://update.peiluyou.com/downloads/S905D-N1-Burning-Guide-V3.0.zip)，下载刷机工具包`S905D-N1-Burning-Guide-V3.0.zip`，下载后解压如下图所示；    
+![image](https://user-images.githubusercontent.com/30925759/204098246-2432b608-098f-40e2-b503-245e6c20620e.png)    
+其中，文件`第1步阅读FX设备教程3.0.pdf`是[【安装教程】](https://help.onethingcloud.com/7cb4/3ed5/77f6)的pdf版本。  
+使用刷机工具包`S905D-N1-Burning-Guide-V3.0.zip`的整个过程操作：依次执行bat脚本，`第2步进入fasteboot.bat`-->`第3步检查是否可以降级.bat`-->`第4步降级.bat`-->`第5步降级完成后执行重启.bat`-->刻录U盘-->`第6步进入U盘模式开始刷机.bat`。  
 
+### (1)第一步  
 N1开机后，进入N1主画面（安卓系统），将N1和电脑接入同一局域网，用USB双公头线连接电脑和N1的靠近HDMI接口的USB口（先接电源再接usb双公头线）；   
 ![image](https://user-images.githubusercontent.com/30925759/204096778-8b87e14c-df41-4c76-abc3-dc0871625955.png)  
-记下N1的内网IP地址；  
+记下N1的内网IP地址，记录下无线网卡mac、有线网卡mac和蓝牙mac；  
 打开adb(Android Debug Bridge) ，开启远程调试，在***固件版本***的位置，连续点击4下鼠标左键，主页会弹出一个提示“打开adb”；  
 ![image](https://user-images.githubusercontent.com/30925759/204096810-54def087-75c1-46b3-b1a8-4311d4ff638f.png)  
 
+### (2)第二步  
 通过adb网络连接N1（用tcp无线调试模式，不是usb调试模式），使设备重启后进入fastboot模式；  
 ```
 #用TCP连接设备（默认端口是5555）
@@ -36,12 +42,14 @@ adb devices -l
 adb shell reboot fastboot
 ```
 
+### (3)第三步  
 N1进入fastboot线刷模式后（通过双公头线USB通信），会听到电脑有个“叮咚”的有新硬件接入提示音，可以在“我的电脑-管理-计算机管理-设备管理器”页面查看是否识别出了已连接设备；  
 ![image](https://user-images.githubusercontent.com/30925759/204121568-383c7823-c0f1-4236-ba39-d3ddb4967a05.png)  
 如果新设备处显示黄色感叹号（此时执行`fastboot devices`读取不到设备），驱动异常，则需要安装“Android ADB Interface”驱动。可以在“windows更新-查看可选更新-驱动程序更新”处下载驱动更新，也可以去微软网站下载安装[LeMobile驱动程序](https://www.catalog.update.microsoft.com/Search.aspx?q=lemobile)。  
 ![image](https://user-images.githubusercontent.com/30925759/204122362-182b8aa2-153a-46be-93b6-08d72f9c0110.png)  
 或者去谷歌网站下载[Google USB 驱动程序ZIP文件](https://developer.android.google.cn/studio/run/win-usb?hl=zh-cn)，在“设备管理器”页面，右键点击已连接设备的名称，然后选择“更新驱动程序”，手动更新安装驱动。  
 
+### (4)第四步  
 在fastboot线刷模式下，检查是否可降级，执行降级操作；  
 如果固件版本是V2.22~V2.32，则需要换掉斐讯的bootloader，将boot分区降级到低版本。如果固件版本是V2.19，那么不需要降级。  
 降级完成后，N1主界面上显示的***固件版本***不会有变化。  
