@@ -171,7 +171,8 @@ fastboot reboot
     (4)安装后的优化配置  
     - A.使用`armbian-config`图形化界面更新系统  
         菜单路径【System-Firmware】，可能会失败，一般重复多试几次就可以了。  
-        不要直接执行`apt update && apt upgrade`更新系统，特别是在选“Y”时要特别注意，否则会更改适配N1的系统配置。  
+        首先升级下`armbian-config`版本`apt install --only-upgrade armbian-config`  
+        不要直接执行`apt update && apt upgrade`更新系统，特别是在选“Y”时要特别注意，否则会更改适配N1的一些系统配置。需要哪个就单独升级。  
         可以先换源的地址`vim /etc/apt/sources.list`，再进行更新，注意的是地址路径中的版本号名称一定要与本系统的版本号名称一致。  
         有的系统armbian-config版本可以直接用`armbian-config`图形化界面换镜像源，路径是“armbian-config -> Personal -> Mirrors -> 选一个源 -> Ok”。如果没有Mirrors菜单，执行`apt install --only-upgrade armbian-config`更新升级armbian-config软件版本。执行`apt list --installed armbian-config`查看当前已安装版本。    
         同时，也可以指定下docker官方源，例如Ubuntu的，参考官方文档`https://docs.docker.com/engine/install/ubuntu/`，复制粘贴命令跑下就可以了  
